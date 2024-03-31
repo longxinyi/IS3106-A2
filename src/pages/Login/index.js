@@ -66,7 +66,17 @@ export default function Index() {
           />
         </RadioGroup>
       </FormControl>
-      <Button className="bg-orange font-semibold text-white">Log In</Button>
+      <Button
+        className="bg-orange font-semibold text-white"
+        sx={{
+          ml: 1,
+          "&.MuiButtonBase-root:hover": {
+            bgcolor: "#D1410C",
+          },
+        }}
+      >
+        Log In
+      </Button>
       <div className="flex flex-row gap-2">
         <p>Don't have an account?</p>
         <button

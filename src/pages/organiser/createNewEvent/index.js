@@ -162,7 +162,15 @@ const Index = () => {
             </Box>
           </Collapse>
         </div>
-        <Button className="bg-orange text-white font-bold">
+        <Button
+          className="bg-orange text-white font-bold"
+          sx={{
+            ml: 1,
+            "&.MuiButtonBase-root:hover": {
+              bgcolor: "#D1410C",
+            },
+          }}
+        >
           Save and Continue
         </Button>
       </div>
