@@ -8,13 +8,39 @@ import {
   MenuItem,
   IconButton,
   Divider,
+  Box,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { useRouter } from "next/router";
 
-const DUMMY_EVENTS = [];
+let DUMMY_EVENTS = [
+  {
+    picture: "",
+    name: "Taylor Swift",
+    location: "Singapore",
+    description: "Eras Tour 2024",
+    date: "02/04/2024",
+    registrationDeadline: "03/04/2024",
+    registeredAttendees: [
+      { name: "xinyi", present: false },
+      { name: "yuri", present: false },
+    ],
+  },
+  {
+    picture: "",
+    name: "Jap food",
+    location: "Singapore",
+    description: "2024",
+    date: "02/04/2024",
+    registrationDeadline: "03/04/2024",
+    registeredAttendees: [
+      { name: "xinyi", present: false },
+      { name: "yuri", present: false },
+    ],
+  },
+];
 
 const Index = () => {
   const router = useRouter();
@@ -64,7 +90,21 @@ const Index = () => {
             </Typography>
           </div>
         ) : (
-          <p>display events</p>
+          <div className="flex flex-wrap gap-10">
+            {DUMMY_EVENTS.map((event) => (
+              <Box
+                className="p-10 flex flex-col w-1/3 h-min border-black border-solid border-2"
+                sx={{ ":hover": { boxShadow: "3px 3px 3px 3px blue" } }}
+              >
+                <Box>place for picture</Box>
+                <Typography variant="h6" className="font-bold">
+                  {event.name}
+                </Typography>
+                <Typography variant="body1">{event.date}</Typography>
+                <Typography variant="body1">{event.location}</Typography>
+              </Box>
+            ))}
+          </div>
         )}
       </div>
     </div>

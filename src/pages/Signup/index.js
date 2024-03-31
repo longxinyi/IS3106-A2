@@ -74,7 +74,7 @@ export default function Index() {
         <p>Already have an account?</p>
         <button
           className="font-bold text-blue"
-          onClick={() => router.push("/Login")}
+          onClick={() => router.push("/login")}
         >
           Log In
         </button>
