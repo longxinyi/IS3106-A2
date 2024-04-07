@@ -11,8 +11,10 @@ import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { useState } from "react";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { useRouter } from "next/router";
 
 const Index = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);

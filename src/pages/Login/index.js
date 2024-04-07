@@ -5,11 +5,9 @@ import {
   InputAdornment,
   IconButton,
   Typography,
-  RadioGroup,
-  FormControlLabel,
   FormControl,
-  FormLabel,
-  Radio,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -51,20 +49,16 @@ export default function Index() {
         }
         placeholder="Password"
       />
-      <FormControl className="pl-5 p-3">
-        <FormLabel>I'm an: </FormLabel>
-        <RadioGroup defaultValue="attendee" row>
-          <FormControlLabel
-            value="attendee"
-            control={<Radio />}
-            label="Attendee"
-          />
-          <FormControlLabel
-            value="organiser"
-            control={<Radio />}
-            label="Organiser"
-          />
-        </RadioGroup>
+      <FormControl className="pl-5 p-3 gap-2">
+        <Typography variant="body2">I'm an: </Typography>
+        <ToggleButtonGroup
+          value="attendee"
+          exclusive
+          //onChange={handleAlignment}
+        >
+          <ToggleButton value="attendee">Attendee</ToggleButton>
+          <ToggleButton value="organiser">Organiser</ToggleButton>
+        </ToggleButtonGroup>
       </FormControl>
       <Button
         className="bg-orange font-semibold text-white"
