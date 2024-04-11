@@ -6,39 +6,139 @@ import {
   IconButton,
   Typography,
   FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
+  ToggleButtonGroup,
+  ToggleButton,
+  Alert,
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import axiosClient from "@/components/helpers/axiosClient";
 
 export default function Index() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [userRole, setUserRole] = useState("attendee");
+  const [formDetails, setFormDetails] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    password: "",
+  });
+
+  const [errorMsgs, setErrorMsgs] = useState("");
+  const [signUpError, setSignUpError] = useState("");
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
+
+  const onChangeField = (field) => (e) => {
+    setFormDetails({
+      ...formDetails,
+      [field]: e.target.value,
+    });
+  };
+
+  const validateFields = () => {
+    let hasError = false;
+    const { name, phone, email, password } = formDetails;
+    let newErrorMsg = "";
+
+    if (name.length < 1) {
+      hasError = true;
+      newErrorMsg = newErrorMsg + "Name, ";
+    }
+
+    if (phone.length < 8) {
+      hasError = true;
+      newErrorMsg = newErrorMsg + "Phone, ";
+    }
+
+    if (email.length < 1 || !email.includes("@")) {
+      hasError = true;
+      newErrorMsg = newErrorMsg + "Email, ";
+    }
+
+    const pattern = /^(?=.*[a-zA-Z])(?=.*\d).+$/;
+    if (
+      password.length < 8 ||
+      password.length > 20 ||
+      !pattern.test(password)
+    ) {
+      hasError = true;
+      newErrorMsg = newErrorMsg + "Password, ";
+    }
+    setErrorMsgs(newErrorMsg);
+    console.log("data validated");
+    return hasError;
+  };
+
+  const onSignUp = async () => {
+    const hasError = validateFields();
+    if (!hasError) {
+      //all fields are ok, we send data to BE
+      //redirect to another page
+      try {
+        await axiosClient
+          .post(
+            userRole,
+            //request body below
+            formDetails
+          )
+          .then((response) => localStorage.setItem("userId", response.data.id));
+        router.push(`/${userRole}`);
+      } catch (error) {
+        console.error(error);
+        setSignUpError(
+          "This email already has an existing account. Try logging in instead."
+        );
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col p-10 w-screen gap-3">
       <Typography
         variant="h4"
-        className="text-orange font-bold cursor-pointer"
+        className="text-orange font-bold cursor-pointer w-fit"
         onClick={() => router.push("/")}
       >
         eventbrite
       </Typography>
       <h4>Create an account</h4>
-      <TextField placeholder="Name" variant="outlined" />
-      <TextField placeholder="Phone" variant="outlined" />
-      <TextField placeholder="Email address" variant="outlined" />
+
+      {errorMsgs.length > 0 && (
+        <Alert severity="warning">
+          Holy guacamole! You should check on these field(s):
+          <strong> {errorMsgs.substring(0, errorMsgs.length - 2)}</strong>
+        </Alert>
+      )}
+      {signUpError.length > 0 && <Alert severity="error">{signUpError}</Alert>}
+      <TextField
+        placeholder="Name"
+        variant="outlined"
+        onChange={onChangeField("name")}
+        value={formDetails.name}
+      />
+      <TextField
+        placeholder="Phone"
+        variant="outlined"
+        onChange={onChangeField("phone")}
+        value={formDetails.phone}
+      />
+      <TextField
+        placeholder="Email address"
+        variant="outlined"
+        onChange={onChangeField("email")}
+        value={formDetails.email}
+      />
       <OutlinedInput
+        value={formDetails.password}
+        onChange={onChangeField("password")}
         type={showPassword ? "text" : "password"}
         endAdornment={
           <InputAdornment position="end">
@@ -54,20 +154,20 @@ export default function Index() {
         }
         placeholder="Password"
       />
-      <FormControl className="pl-5 p-3">
-        <FormLabel>I'm an: </FormLabel>
-        <RadioGroup defaultValue="attendee" row>
-          <FormControlLabel
-            value="attendee"
-            control={<Radio />}
-            label="Attendee"
-          />
-          <FormControlLabel
-            value="organiser"
-            control={<Radio />}
-            label="Organiser"
-          />
-        </RadioGroup>
+      <Typography variant="subtitle1" className="text-grey pl-5">
+        Your password must be 8-20 characters long, containing both letters and
+        numbers.
+      </Typography>
+      <FormControl className="p-5 gap-5 flex flex-row items-center">
+        <Typography variant="body2">I'm an: </Typography>
+        <ToggleButtonGroup
+          value={userRole}
+          exclusive
+          onChange={(e) => setUserRole(e.target.value)}
+        >
+          <ToggleButton value="attendee">Attendee</ToggleButton>
+          <ToggleButton value="organiser">Organiser</ToggleButton>
+        </ToggleButtonGroup>
       </FormControl>
       <Button
         className="bg-orange font-semibold text-white"
@@ -77,6 +177,7 @@ export default function Index() {
             bgcolor: "#D1410C",
           },
         }}
+        onClick={onSignUp}
       >
         Sign Up
       </Button>

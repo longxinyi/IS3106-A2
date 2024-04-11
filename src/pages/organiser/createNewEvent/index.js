@@ -7,6 +7,7 @@ import {
   TextField,
   Input,
   InputAdornment,
+  Alert,
 } from "@mui/material";
 import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
 import { useRouter } from "next/router";
@@ -19,11 +20,97 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import axiosClient from "@/components/helpers/axiosClient";
 
 const Index = () => {
   const router = useRouter();
 
   const [checked, setChecked] = useState([false, false, false]);
+  const [errorMsgs, setErrorMsgs] = useState("");
+  const [formDetails, setFormDetails] = useState({
+    dateOfEvent: "",
+    description: "",
+    location: "",
+    maxPax: 0,
+    name: "",
+    signUpDeadline: "",
+  });
+
+  const onChangeField = (field) => (e) => {
+    if (field == "signUpDeadline" || field == "dateOfEvent") {
+      const firstHalf = JSON.stringify(e.$d).substring(1, 9);
+      const secondHalf = Number(JSON.stringify(e.$d).substring(9, 11)) + 1;
+      setFormDetails({
+        ...formDetails,
+        [field]: firstHalf + secondHalf.toString(),
+      });
+      return;
+    }
+
+    if (field == "maxPax") {
+      setFormDetails({
+        ...formDetails,
+        [field]: Number(e.target.value),
+      });
+      return;
+    }
+    setFormDetails({
+      ...formDetails,
+      [field]: e.target.value,
+    });
+  };
+
+  const validateFields = () => {
+    let hasError = false;
+    const { dateOfEvent, description, location, maxPax, name, signUpDeadline } =
+      formDetails;
+    let newErrorMsg = "";
+
+    if (name.length < 1) {
+      hasError = true;
+      newErrorMsg = newErrorMsg + "Name, ";
+    }
+
+    if (dateOfEvent.length < 1) {
+      hasError = true;
+      newErrorMsg = newErrorMsg + "Date of Event, ";
+    }
+    if (description.length < 1) {
+      hasError = true;
+      newErrorMsg = newErrorMsg + "Description, ";
+    }
+
+    if (location.length < 1) {
+      hasError = true;
+      newErrorMsg = newErrorMsg + "Location, ";
+    }
+
+    if (maxPax < 1) {
+      hasError = true;
+      newErrorMsg = newErrorMsg + "Max Pax, ";
+    }
+
+    if (signUpDeadline.length < 1) {
+      hasError = true;
+      newErrorMsg = newErrorMsg + "Signup Deadline, ";
+    }
+
+    setErrorMsgs(newErrorMsg);
+    return hasError;
+  };
+
+  const onCreateEvent = async () => {
+    const userId = localStorage.getItem("userId");
+    const hasError = validateFields();
+    if (!hasError) {
+      try {
+        await axiosClient.post(`/organiser/${userId}/newEvent`, formDetails);
+        router.push("/organiser");
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
 
   const handleOpenTabs = (number) => () => {
     const prevState = checked[number];
@@ -55,6 +142,12 @@ const Index = () => {
             Add all of your event details and let attendees know what to expect
           </Typography>
         </div>
+        {errorMsgs.length > 0 && (
+          <Alert severity="warning">
+            Holy guacamole! You should check on these field(s):
+            <strong> {errorMsgs.substring(0, errorMsgs.length - 2)}</strong>
+          </Alert>
+        )}
         <div className="pl-10 pr-10 flex flex-col gap-5">
           <Collapse in={checked[0]} collapsedSize={60}>
             <Box
@@ -111,7 +204,11 @@ const Index = () => {
                       what your event is about.
                     </Typography>
                   </div>
-                  <TextField variant="outlined" label="Event title" />
+                  <TextField
+                    variant="outlined"
+                    label="Event title"
+                    onChange={onChangeField("name")}
+                  />
                 </div>
                 <div className="gap-5 flex flex-col">
                   <div>
@@ -127,6 +224,25 @@ const Index = () => {
                     variant="outlined"
                     label="Event Description"
                     multiline
+                    onChange={onChangeField("description")}
+                  />
+                </div>
+                <div className="gap-5 flex flex-col">
+                  <div>
+                    <Typography variant="subtitle1">
+                      Max No. of Attendees
+                    </Typography>
+                    <Typography variant="caption">
+                      Limit the number of attendees to ensure better planning
+                      and safety.
+                    </Typography>
+                  </div>
+
+                  <TextField
+                    variant="outlined"
+                    label="Max Pax"
+                    inputProps={{ type: "number", min: 1 }}
+                    onChange={onChangeField("maxPax")}
                   />
                 </div>
               </div>
@@ -148,8 +264,15 @@ const Index = () => {
                 {checked[2] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
               </div>
               <div className="mt-16 gap-10 flex flex-col">
+                <Typography variant="body1">
+                  When and where will your event be?
+                </Typography>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker label="Date" disablePast />
+                  <DatePicker
+                    label="Date"
+                    disablePast
+                    onChange={onChangeField("dateOfEvent")}
+                  />
                 </LocalizationProvider>
                 <TextField
                   label="Location"
@@ -157,7 +280,20 @@ const Index = () => {
                   InputProps={{
                     startAdornment: <LocationOnIcon />,
                   }}
+                  onChange={onChangeField("location")}
                 />
+                <div className="gap-5 flex flex-col">
+                  <Typography variant="body1" className="text-center">
+                    Set a signup deadline to allow sufficient time for planning.
+                  </Typography>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Signup Deadline"
+                      disablePast
+                      onChange={onChangeField("signUpDeadline")}
+                    />
+                  </LocalizationProvider>
+                </div>
               </div>
             </Box>
           </Collapse>
@@ -170,6 +306,7 @@ const Index = () => {
               bgcolor: "#D1410C",
             },
           }}
+          onClick={onCreateEvent}
         >
           Save and Continue
         </Button>

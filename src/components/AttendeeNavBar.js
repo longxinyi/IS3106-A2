@@ -3,7 +3,7 @@ import { Button, Menu, MenuItem, Typography } from "@mui/material";
 import { useState } from "react";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
-const OrganiserNavBar = () => {
+const AttendeeNavBar = () => {
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -15,13 +15,14 @@ const OrganiserNavBar = () => {
     localStorage.removeItem("userId");
     router.push("/");
   };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
 
   const viewProfile = () => {
     handleClose();
-    router.push("/organiser/profile");
+    router.push("/attendee/profile");
   };
 
   return (
@@ -63,4 +64,4 @@ const OrganiserNavBar = () => {
   );
 };
 
-export default OrganiserNavBar;
+export default AttendeeNavBar;
