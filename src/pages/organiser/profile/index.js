@@ -36,7 +36,6 @@ const Index = () => {
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
-    console.log(userId);
     setUserId(userId);
     retrieveUserProfile(userId);
   }, []);

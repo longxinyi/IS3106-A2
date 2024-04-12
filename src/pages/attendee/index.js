@@ -14,37 +14,45 @@ import {
   DialogActions,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { useState } from "react";
-let DUMMY_EVENTS = [
-  {
-    picture: "",
-    name: "Taylor Swift",
-    location: "Singapore",
-    description: "Eras Tour 2024",
-    date: "02/04/2024",
-    registrationDeadline: "03/04/2024",
-    registeredAttendees: [
-      { name: "xinyi", present: false },
-      { name: "yuri", present: false },
-    ],
-  },
-  {
-    picture: "",
-    name: "Jap food",
-    location: "Singapore",
-    description: "2024",
-    date: "02/04/2024",
-    registrationDeadline: "03/04/2024",
-    registeredAttendees: [
-      { name: "xinyi", present: false },
-      { name: "yuri", present: false },
-    ],
-  },
-];
+import { useState, useEffect } from "react";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import axiosClient from "@/components/helpers/axiosClient";
 
 const Index = () => {
   const [registered, setRegistered] = useState(false);
   const [open, setOpen] = useState(false);
+  const [allEvents, setAllEvents] = useState([]);
+  const [filteredEvents, setFilteredEvents] = useState(allEvents);
+  const [searchValue, setSearchValue] = useState("");
+
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    getAllEvents();
+  }, []);
+
+  const getAllEvents = async () => {
+    try {
+      await axiosClient.get(`/events`).then((res) => {
+        setAllEvents(res.data);
+        setFilteredEvents(res.data);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  console.log(allEvents);
+
+  const handleOnSearch = (e) => {
+    if (e.target.value == "") {
+      setFilteredEvents(allEvents);
+    }
+    setSearchValue(e.target.value);
+    const filteredEvents = allEvents.filter((event) =>
+      event.name.includes(e.target.value)
+    );
+    setFilteredEvents(filteredEvents);
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -72,6 +80,8 @@ const Index = () => {
               <SearchIcon />
             </InputAdornment>
           }
+          value={searchValue}
+          onChange={handleOnSearch}
         />
         <Divider orientation="vertical" flexItem />
         <TextField
@@ -87,7 +97,7 @@ const Index = () => {
         </TextField>
       </div>
       <div className="flex flex-col justify-center items-center p-5">
-        {DUMMY_EVENTS.length < 1 ? (
+        {filteredEvents.length < 1 ? (
           <div className="flex flex-col justify-center items-center">
             <CalendarMonthIcon />
 
@@ -97,7 +107,7 @@ const Index = () => {
           </div>
         ) : (
           <div className="flex flex-wrap gap-10">
-            {DUMMY_EVENTS.map((event) => (
+            {filteredEvents.map((event) => (
               <div>
                 <Box
                   className="p-10 flex flex-col min-w-fit h-min border-black border-solid border-2"

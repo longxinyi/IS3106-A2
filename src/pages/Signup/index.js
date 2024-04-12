@@ -73,7 +73,7 @@ export default function Index() {
       newErrorMsg = newErrorMsg + "Password, ";
     }
     setErrorMsgs(newErrorMsg);
-    console.log("data validated");
+
     return hasError;
   };
 
