@@ -41,8 +41,6 @@ const Index = () => {
     }
   };
 
-  console.log(allEvents);
-
   const handleOnSearch = (e) => {
     if (e.target.value == "") {
       setFilteredEvents(allEvents);
