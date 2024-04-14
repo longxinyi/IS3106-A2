@@ -1,17 +1,10 @@
 import {
   Typography,
-  Input,
   InputAdornment,
-  TextField,
   OutlinedInput,
   Button,
-  MenuItem,
-  IconButton,
   Divider,
   Box,
-  Drawer,
-  ToggleButtonGroup,
-  ToggleButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -24,6 +17,7 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import axiosClient from "@/components/helpers/axiosClient";
+import Error from "@/components/Error";
 
 const Index = () => {
   const router = useRouter();
@@ -33,6 +27,17 @@ const Index = () => {
   const [searchValue, setSearchValue] = useState("");
   const [createdEvents, setCreatedEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState(createdEvents);
+  const [noAccess, setNoAccess] = useState(false);
+  const [currentEventId, setCurrentEventId] = useState();
+
+  useEffect(() => {
+    if (
+      localStorage.getItem("userId") == null ||
+      localStorage.getItem("userType") !== "organiser"
+    ) {
+      setNoAccess(true);
+    }
+  }, []);
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -43,8 +48,9 @@ const Index = () => {
     setOpenDialog(false);
   };
 
-  const handleClickOpen = () => {
+  const handleClickOpen = (eventId) => () => {
     setOpenDialog(true);
+    setCurrentEventId(eventId);
   };
 
   const getAllCreatedEvents = async (userId) => {
@@ -68,6 +74,29 @@ const Index = () => {
     );
     setFilteredEvents(filteredEvents);
   };
+
+  const deleteEvent = async () => {
+    const userId = localStorage.getItem("userId");
+    try {
+      await axiosClient.delete(`/organiser/${userId}/delete/${currentEventId}`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDeleteEvent = () => {
+    deleteEvent();
+    handleClose();
+    const filteredEvents = createdEvents.filter(
+      (event) => event.id !== currentEventId
+    );
+    setFilteredEvents(filteredEvents);
+    setCreatedEvents(filteredEvents);
+  };
+
+  if (noAccess == true) {
+    return <Error />;
+  }
 
   return (
     <div>
@@ -123,7 +152,6 @@ const Index = () => {
               {filteredEvents.map((event) => (
                 <div>
                   <Box className="min-w-fit flex flex-col m-8 w-1/2 transition-transform ease-in-out duration-300 transform-gpu hover:-translate-y-2 hover:translate-z-2 hover:rotate-x-3 hover:shadow-md rounded-lg p-5 bg-offwhite">
-                    <Box>place for picture</Box>
                     <Typography variant="button" className="font-bold">
                       {event.name}
                     </Typography>
@@ -151,7 +179,7 @@ const Index = () => {
                       </Button>
                       <Button
                         className="bg-orange text-white font-bold"
-                        onClick={handleClickOpen}
+                        onClick={handleClickOpen(event.id)}
                         sx={{
                           ml: 1,
                           "&.MuiButtonBase-root:hover": {
@@ -193,7 +221,7 @@ const Index = () => {
                         Cancel
                       </Button>
                       <Button
-                        onClick={handleClose}
+                        onClick={handleDeleteEvent}
                         className="bg-orange text-white font-bold"
                         sx={{
                           ml: 1,

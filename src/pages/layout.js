@@ -7,7 +7,6 @@ import AttendeeNavBar from "@/components/AttendeeNavBar";
 
 export default function RootLayout({ children }) {
   const router = useRouter();
-
   return (
     <div className="w-screen h-screen">
       {router.pathname.includes("/organiser") && <OrganiserNavBar />}

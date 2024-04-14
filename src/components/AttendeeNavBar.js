@@ -30,7 +30,7 @@ const AttendeeNavBar = () => {
       <Typography
         variant="h5"
         className="text-orange font-bold cursor-pointer"
-        onClick={() => router.push("/")}
+        onClick={() => router.push("/attendee")}
       >
         eventbrite
       </Typography>
@@ -43,7 +43,7 @@ const AttendeeNavBar = () => {
           aria-haspopup="true"
           aria-expanded={open ? "true" : undefined}
           onClick={handleClick}
-          className="gap-1 flex flex-row text-black bg-transparent"
+          className="gap-1 flex flex-row bg-transparent text-black font-bold"
         >
           <AccountCircleIcon /> Profile
         </Button>

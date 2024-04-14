@@ -7,16 +7,27 @@ import {
   IconButton,
 } from "@mui/material";
 import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
-import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { useState, useEffect } from "react";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useRouter } from "next/router";
 import axiosClient from "@/components/helpers/axiosClient";
+import Error from "@/components/Error";
+import ImageHandler from "@/components/ImageHandling";
 
 const Index = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [noAccess, setNoAccess] = useState(false);
+
+  useEffect(() => {
+    if (
+      localStorage.getItem("userId") == null ||
+      localStorage.getItem("userType") !== "organiser"
+    ) {
+      setNoAccess(true);
+    }
+  }, []);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -32,6 +43,7 @@ const Index = () => {
     name: "",
     password: "",
     phone: "",
+    profilePic: "",
   });
 
   useEffect(() => {
@@ -42,15 +54,30 @@ const Index = () => {
 
   const retrieveUserProfile = async (userId) => {
     try {
-      await axiosClient
-        .get(`/organiser/profile/${userId}`)
-        .then((res) => setUserDetails(res.data));
+      await axiosClient.get(`/organiser/profile/${userId}`).then((res) => {
+        setUserDetails(res.data);
+      });
     } catch (error) {
       console.error(error);
     }
   };
 
   const onChangeField = (field) => (e) => {
+    if (field == "profilePic") {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUserDetails({
+          ...userDetails,
+          profilePic: reader.result,
+        });
+      };
+      if (file) {
+        reader.readAsDataURL(file);
+      }
+      return;
+    }
+
     setUserDetails({
       ...userDetails,
       [field]: e.target.value,
@@ -97,11 +124,16 @@ const Index = () => {
         await axiosClient
           .post(`/organiser/updateProfile`, { ...userDetails, id: userId })
           .then((res) => setUserDetails(res.data));
+        router.push("/organiser");
       } catch (error) {
         console.error(error);
       }
     }
   };
+
+  if (noAccess == true) {
+    return <Error />;
+  }
 
   return (
     <div className="pl-44 pr-44 pt-5 pb-5">
@@ -128,22 +160,7 @@ const Index = () => {
             <Typography variant="h6" className="font-bold">
               Profile Photo
             </Typography>
-            <label htmlFor="contained-button-file">
-              <Button
-                variant="text"
-                component="span"
-                className="border-blue border-dashed border-2 w-full h-20 gap-3"
-              >
-                <AddAPhotoIcon /> Add a profile image
-                <input
-                  accept="image/*"
-                  className="hidden"
-                  id="contained-button-file"
-                  multiple
-                  type="file"
-                />
-              </Button>
-            </label>
+            <ImageHandler localStorageName="organiser"></ImageHandler>
           </div>
           <div>
             <Typography variant="h6" className="font-bold">

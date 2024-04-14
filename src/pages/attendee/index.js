@@ -12,19 +12,44 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Snackbar,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useState, useEffect } from "react";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import axiosClient from "@/components/helpers/axiosClient";
+import Error from "@/components/Error";
 
 const Index = () => {
   const [open, setOpen] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const [allEvents, setAllEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState(allEvents);
   const [searchValue, setSearchValue] = useState("");
   const [userRegisteredEvents, setUserRegisteredEvents] = useState([]);
   const [category, setCategory] = useState("allEvents");
+  const [noAccess, setNoAccess] = useState(false);
+
+  useEffect(() => {
+    if (
+      localStorage.getItem("userId") == null ||
+      localStorage.getItem("userType") !== "attendee"
+    ) {
+      setNoAccess(true);
+    }
+  }, []);
+
+  const handleClickSnackbar = () => {
+    setOpenSnackbar(true);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -90,6 +115,7 @@ const Index = () => {
   const handleRegister = (eventId) => () => {
     register(eventId);
     setUserRegisteredEvents([...userRegisteredEvents, eventId]);
+    handleClickSnackbar();
   };
 
   const handleUnregister = (eventId) => () => {
@@ -99,6 +125,7 @@ const Index = () => {
       (event) => event != eventId
     );
     setUserRegisteredEvents(removeRegisteredEvents);
+    handleClickSnackbar();
   };
 
   const unregister = async (eventId) => {
@@ -121,6 +148,10 @@ const Index = () => {
       setFilteredEvents(registeredEvents);
     }
   };
+
+  if (noAccess == true) {
+    return <Error />;
+  }
 
   return (
     <div>
@@ -150,19 +181,19 @@ const Index = () => {
             select
             variant="standard"
             defaultValue="allEvents"
-            className="rounded-full bg-blue p-1 pl-5 pr-5"
+            className="rounded-full bg-offwhite p-1 pl-5 pr-5"
             onChange={onChangeCategory}
             value={category}
             InputProps={{
               disableUnderline: true,
-              style: { color: "#FFFFFF" },
+              style: { color: "#3659E3", fontWeight: "bold" },
             }}
           >
             {filterOptions.map((option) => (
               <MenuItem
                 key={option.value}
                 value={option.value}
-                className="text-black"
+                className="text-blue"
               >
                 {option.label}
               </MenuItem>
@@ -183,7 +214,6 @@ const Index = () => {
               {filteredEvents.map((event) => (
                 <div>
                   <Box className="min-w-fit flex flex-col m-8 w-1/2 transition-transform ease-in-out duration-300 transform-gpu hover:-translate-y-2 hover:translate-z-2 hover:rotate-x-3 hover:shadow-md rounded-lg p-5 bg-offwhite">
-                    <Box>place for picture</Box>
                     <Typography variant="h6" className="font-bold">
                       {event.name}
                     </Typography>
@@ -269,6 +299,13 @@ const Index = () => {
           )}
         </div>
       </div>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={2000}
+        onClose={handleCloseSnackbar}
+        message="Registration Updated!"
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      />
     </div>
   );
 };

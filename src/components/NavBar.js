@@ -14,7 +14,7 @@ const NavBar = ({ onChange, searchValue }) => {
   const router = useRouter();
 
   return (
-    <div className="w-screen sticky top-0 flex flex-row justify-between p-4 bg-white items-center">
+    <div className="w-screen sticky top-0 flex flex-row justify-evenly gap-5 p-4 bg-white items-center">
       <Typography
         variant="h5"
         className="text-orange font-bold cursor-pointer"
@@ -23,7 +23,7 @@ const NavBar = ({ onChange, searchValue }) => {
         eventbrite
       </Typography>
       <OutlinedInput
-        className="h-6 rounded-full text-black bg-offwhite p-5"
+        className="h-6 w-1/2 rounded-full text-black bg-offwhite p-5"
         placeholder="Search events"
         startAdornment={
           <InputAdornment position="start">
@@ -34,18 +34,18 @@ const NavBar = ({ onChange, searchValue }) => {
         onChange={onChange}
       />
 
-      <div className="flex flex-row gap-3">
+      <div className="flex flex-row gap-5">
         <Button
           onClick={() => router.push("/signup")}
           variant="text"
-          className="bg-transparent text-black font-bold"
+          className="bg-white text-blue font-bold"
         >
           Sign Up
         </Button>
         <Button
           onClick={() => router.push("/login")}
           variant="text"
-          className="bg-transparent text-black font-bold"
+          className="bg-white text-orange font-bold"
         >
           Log In
         </Button>

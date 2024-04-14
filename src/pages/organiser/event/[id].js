@@ -1,22 +1,40 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import {
-  Typography,
-  ToggleButtonGroup,
-  ToggleButton,
-  Alert,
-  Button,
-} from "@mui/material";
+import { Typography, Alert, Button, Snackbar } from "@mui/material";
 import axiosClient from "@/components/helpers/axiosClient";
 import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
 import NoAccountsIcon from "@mui/icons-material/NoAccounts";
+import Error from "@/components/Error";
 
 const ManageAttendance = () => {
   const router = useRouter();
   const { id } = router.query;
   const [currentEventAttendees, setCurrentEventAttendees] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const [attendance, setAttendance] = useState({});
+  const [noAccess, setNoAccess] = useState(false);
+
+  useEffect(() => {
+    if (
+      localStorage.getItem("userId") == null ||
+      localStorage.getItem("userType") !== "organiser"
+    ) {
+      setNoAccess(true);
+    }
+  }, []);
+
+  const handleClickSnackbar = () => {
+    setOpenSnackbar(true);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
 
   const retrieveEventById = async () => {
     try {
@@ -55,6 +73,7 @@ const ManageAttendance = () => {
   const onChangeAttendance = (attendeeId) => (e) => {
     const action = e.target.value;
     updateAttendance(attendeeId, action);
+    handleClickSnackbar();
     if (action == "attend") {
       const updateAttendance = [...attendance[attendeeId], Number(id)];
 
@@ -92,6 +111,10 @@ const ManageAttendance = () => {
       clearTimeout(timer);
     };
   }, [showPopup]);
+
+  if (noAccess == true) {
+    return <Error />;
+  }
 
   return (
     <div className="p-20 flex flex-col">
@@ -158,6 +181,13 @@ const ManageAttendance = () => {
           </Typography>
         )}
       </div>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={2000}
+        onClose={handleCloseSnackbar}
+        message="Registration Updated!"
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      />
     </div>
   );
 };

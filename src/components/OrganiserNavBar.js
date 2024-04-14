@@ -29,7 +29,7 @@ const OrganiserNavBar = () => {
       <Typography
         variant="h5"
         className="text-orange font-bold cursor-pointer"
-        onClick={() => router.push("/")}
+        onClick={() => router.push("/organiser")}
       >
         eventbrite
       </Typography>
@@ -42,7 +42,7 @@ const OrganiserNavBar = () => {
           aria-haspopup="true"
           aria-expanded={open ? "true" : undefined}
           onClick={handleClick}
-          className="gap-1 flex flex-row text-black bg-transparent"
+          className="gap-1 flex flex-row text-black font-bold bg-transparent"
         >
           <AccountCircleIcon /> Profile
         </Button>

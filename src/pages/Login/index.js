@@ -78,12 +78,15 @@ export default function Index() {
             //request body below
             formDetails
           )
-          .then((response) => localStorage.setItem("userId", response.data.id));
+          .then((response) => {
+            localStorage.setItem("userId", response.data.id);
+            localStorage.setItem("userType", userRole);
+          });
         router.push(`/${userRole}`);
       } catch (error) {
         console.error(error);
         setSignUpError(
-          "This email is not registered yet. Try signing up instead."
+          "Something went wrong, did you enter the correct email? Or, try signing up."
         );
       }
     }

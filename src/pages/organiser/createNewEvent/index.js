@@ -1,7 +1,7 @@
 import { Typography, Button, Box, TextField, Alert } from "@mui/material";
 import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import Collapse from "@mui/material/Collapse";
@@ -11,6 +11,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import axiosClient from "@/components/helpers/axiosClient";
+import Error from "@/components/Error";
 
 const Index = () => {
   const router = useRouter();
@@ -25,6 +26,17 @@ const Index = () => {
     name: "",
     signUpDeadline: "",
   });
+
+  const [noAccess, setNoAccess] = useState(false);
+
+  useEffect(() => {
+    if (
+      localStorage.getItem("userId") == null ||
+      localStorage.getItem("userType") !== "organiser"
+    ) {
+      setNoAccess(true);
+    }
+  }, []);
 
   const onChangeField = (field) => (e) => {
     if (field == "signUpDeadline" || field == "dateOfEvent") {
@@ -112,6 +124,10 @@ const Index = () => {
       setChecked([checked[0], checked[1], !prevState]);
     }
   };
+
+  if (noAccess == true) {
+    return <Error />;
+  }
   return (
     <div className="pl-44 pr-44 pt-5 pb-5">
       <Typography
@@ -139,37 +155,6 @@ const Index = () => {
           </Alert>
         )}
         <div className="pl-10 pr-10 flex flex-col gap-5">
-          <Collapse in={checked[0]} collapsedSize={60}>
-            <Box
-              className={`${
-                checked[0] ? "border-blue border-solid border-2" : ""
-              }  w-full h-96 bg-offwhite text-blue pl-5 pr-5 pt-5 pb-5 flex flex-col justify-between`}
-            >
-              <div
-                className="flex flex-row justify-center font-bold gap-2 w-full"
-                onClick={handleOpenTabs(0)}
-              >
-                <FileUploadOutlinedIcon /> Upload photos of your event
-                {checked[0] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-              </div>
-              <label htmlFor="contained-button-file">
-                <Button
-                  variant="text"
-                  component="span"
-                  className="border-blue border-dashed border-2 w-full h-20"
-                >
-                  Select Image
-                  <input
-                    accept="image/*"
-                    className="hidden"
-                    id="contained-button-file"
-                    multiple
-                    type="file"
-                  />
-                </Button>
-              </label>
-            </Box>
-          </Collapse>
           <Collapse in={checked[1]} collapsedSize={64}>
             <Box
               className={`${
