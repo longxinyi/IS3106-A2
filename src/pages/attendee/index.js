@@ -88,7 +88,6 @@ const Index = () => {
   };
 
   const handleRegister = (eventId) => () => {
-    console.log("this is running");
     register(eventId);
     setUserRegisteredEvents([...userRegisteredEvents, eventId]);
   };

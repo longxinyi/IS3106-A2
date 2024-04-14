@@ -7,7 +7,6 @@ import {
   Typography,
   FormControl,
   ToggleButtonGroup,
-  ToggleButton,
   Alert,
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
@@ -15,6 +14,15 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import axiosClient from "@/components/helpers/axiosClient";
+import MuiToggleButton from "@mui/material/ToggleButton";
+import { styled } from "@mui/material/styles";
+
+const ToggleButton = styled(MuiToggleButton)({
+  "&.Mui-selected, &.Mui-selected:hover": {
+    color: "white",
+    backgroundColor: "#3659E3",
+  },
+});
 
 export default function Index() {
   const router = useRouter();
@@ -161,6 +169,12 @@ export default function Index() {
       <FormControl className="p-5 gap-5 flex flex-row items-center">
         <Typography variant="body2">I'm an: </Typography>
         <ToggleButtonGroup
+          sx={{
+            "&.Mui-selected, &.Mui-selected:hover": {
+              color: "red",
+              backgroundColor: "#3659E3",
+            },
+          }}
           value={userRole}
           exclusive
           onChange={(e) => setUserRole(e.target.value)}
