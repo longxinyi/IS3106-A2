@@ -6,29 +6,15 @@ import {
   Typography,
   Input,
   InputAdornment,
+  OutlinedInput,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { useState } from "react";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
-const NavBar = () => {
+const NavBar = ({ onChange, searchValue }) => {
   const router = useRouter();
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
-  const viewProfile = () => {
-    handleClose();
-    router.push("/organiser/profile");
-  };
-  const [isLoggedIn, setLoggedIn] = useState(true);
   return (
-    <div className="w-screen sticky top-0 flex flex-row justify-between p-4">
+    <div className="w-screen sticky top-0 flex flex-row justify-between p-4 bg-white items-center">
       <Typography
         variant="h5"
         className="text-orange font-bold cursor-pointer"
@@ -36,28 +22,30 @@ const NavBar = () => {
       >
         eventbrite
       </Typography>
-      <Input
-        className="h-6"
+      <OutlinedInput
+        className="h-6 rounded-full text-black bg-offwhite p-5"
         placeholder="Search events"
         startAdornment={
           <InputAdornment position="start">
             <SearchIcon />
           </InputAdornment>
         }
+        value={searchValue}
+        onChange={onChange}
       />
 
       <div className="flex flex-row gap-3">
         <Button
           onClick={() => router.push("/signup")}
           variant="text"
-          className="bg-transparent text-black"
+          className="bg-transparent text-black font-bold"
         >
           Sign Up
         </Button>
         <Button
           onClick={() => router.push("/login")}
           variant="text"
-          className="bg-transparent text-black"
+          className="bg-transparent text-black font-bold"
         >
           Log In
         </Button>
