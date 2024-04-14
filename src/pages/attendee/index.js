@@ -19,15 +19,17 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import axiosClient from "@/components/helpers/axiosClient";
 
 const Index = () => {
-  const [registered, setRegistered] = useState(false);
   const [open, setOpen] = useState(false);
   const [allEvents, setAllEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState(allEvents);
   const [searchValue, setSearchValue] = useState("");
+  const [userRegisteredEvents, setUserRegisteredEvents] = useState([]);
+  //const [category, setCategory] = useState("allEvents");
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
     getAllEvents();
+    getAllRegisteredEvents(userId);
   }, []);
 
   const getAllEvents = async () => {
@@ -58,12 +60,61 @@ const Index = () => {
 
   const handleClose = () => {
     setOpen(false);
-    setRegistered(false);
   };
   const filterOptions = [
     { value: "allEvents", label: "All Events" },
     { value: "registeredEvents", label: "Registered Events" },
   ];
+
+  const getAllRegisteredEvents = async (userId) => {
+    try {
+      await axiosClient.get(`/attendee/profile/${userId}`).then((res) => {
+        const listOfRegisteredEvents = res.data.listOfRegisteredEvents;
+        const registeredEventsId = listOfRegisteredEvents.map((e) => e.id);
+        setUserRegisteredEvents(registeredEventsId);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const registerEvent = async (eventId) => {
+    const userId = localStorage.getItem("userId");
+    try {
+      await axiosClient.post(`/attendee/${userId}/register/${eventId}`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const onRegisterEvent = (eventId) => {
+    const userId = localStorage.getItem("userId");
+    registerEvent(eventId);
+    getAllRegisteredEvents(userId);
+  };
+
+  const handleUnregister = async (eventId) => {
+    const userId = localStorage.getItem("userId");
+    try {
+      await axiosClient.post(`/attendee/${userId}/unregister/${eventId}`);
+    } catch (error) {
+      console.error(error);
+    }
+    handleClose();
+  };
+
+  const onChangeCategory = (e) => {
+    const userId = localStorage.getItem("userId");
+    if (e.target.value == "allEvents") {
+      setFilteredEvents(allEvents);
+    } else {
+      const registeredEvents = allEvents.filter((event) =>
+        event.listOfAttendees.some((attendee) => attendee.id == userId)
+      );
+      setFilteredEvents(registeredEvents);
+    }
+  };
+
   return (
     <div className="p-10 flex flex-col gap-5">
       <Typography variant="h5" className="text-black font-bold">
@@ -85,11 +136,13 @@ const Index = () => {
         <TextField
           select
           defaultValue="allEvents"
-          className="bg-buttonBlue rounded-full text-black border-transparent"
+          className="bg-buttonBlue w-52"
+          onChange={onChangeCategory}
+          //value={category}
         >
           {filterOptions.map((option) => (
             <MenuItem key={option.value} value={option.value}>
-              <div className="text-white">{option.label}</div>
+              <div className="text-black ">{option.label}</div>
             </MenuItem>
           ))}
         </TextField>
@@ -107,17 +160,14 @@ const Index = () => {
           <div className="flex flex-wrap gap-10">
             {filteredEvents.map((event) => (
               <div>
-                <Box
-                  className="p-10 flex flex-col min-w-fit h-min border-black border-solid border-2"
-                  sx={{ ":hover": { boxShadow: "3px 3px 3px 3px blue" } }}
-                >
+                <Box className="p-10 flex flex-col min-w-fit h-min border-black border-solid border-2">
                   <Box>place for picture</Box>
                   <Typography variant="h6" className="font-bold">
                     {event.name}
                   </Typography>
                   <Typography variant="body1">{event.date}</Typography>
                   <Typography variant="body1">{event.location}</Typography>
-                  {registered ? (
+                  {userRegisteredEvents.includes(event.id) ? (
                     <div>
                       <Button
                         className="bg-orange text-white font-bold"
@@ -162,7 +212,7 @@ const Index = () => {
                             Cancel
                           </Button>
                           <Button
-                            onClick={handleClose}
+                            onClick={() => handleUnregister(event.id)}
                             className="bg-orange text-white font-bold"
                             sx={{
                               ml: 1,
@@ -185,7 +235,7 @@ const Index = () => {
                           bgcolor: "#D1410C",
                         },
                       }}
-                      onClick={() => setRegistered(true)}
+                      onClick={() => onRegisterEvent(event.id)}
                     >
                       Register
                     </Button>

@@ -33,9 +33,6 @@ const Index = () => {
   const [searchValue, setSearchValue] = useState("");
   const [createdEvents, setCreatedEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState(createdEvents);
-  const toggleDrawer = (newOpen) => () => {
-    setOpenDrawer(newOpen);
-  };
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -52,12 +49,10 @@ const Index = () => {
 
   const getAllCreatedEvents = async (userId) => {
     try {
-      await axiosClient
-        .get(`/organiser/${userId}/createdEvents`)
-        .then((res) => {
-          setCreatedEvents(res.data);
-          setFilteredEvents(res.data);
-        });
+      await axiosClient.get(`/events`).then((res) => {
+        setCreatedEvents(res.data);
+        setFilteredEvents(res.data);
+      });
     } catch (error) {
       console.error(error);
     }
@@ -125,7 +120,9 @@ const Index = () => {
                   <Typography variant="body1">{event.description}</Typography>
                   <Typography variant="body1">{event.dateOfEvent}</Typography>
                   <Typography variant="body1">{event.location}</Typography>
-                  <Button onClick={toggleDrawer(true)}>
+                  <Button
+                    onClick={() => router.push(`/organiser/event/${event.id}`)}
+                  >
                     Manage Attendance
                   </Button>
                   <Button
@@ -184,38 +181,6 @@ const Index = () => {
                     </Button>
                   </DialogActions>
                 </Dialog>
-                <Drawer
-                  open={openDrawer}
-                  onClose={toggleDrawer(false)}
-                  anchor="right"
-                >
-                  <div className="flex flex-col gap-5 p-10">
-                    <Typography variant="h5" className="font-bold">
-                      Mark Attendance
-                    </Typography>
-                    {event?.registeredAttendees ? (
-                      event.registeredAttendees.map((attendee) => (
-                        <div className="flex flex-row gap-3 justify-between items-center">
-                          <Typography variant="body1">
-                            {attendee.name}
-                          </Typography>
-                          <ToggleButtonGroup
-                            value={attendee.present}
-                            exclusive
-                            //onChange={handleAlignment}
-                          >
-                            <ToggleButton value={true}>Present</ToggleButton>
-                            <ToggleButton value={false}>Absent</ToggleButton>
-                          </ToggleButtonGroup>
-                        </div>
-                      ))
-                    ) : (
-                      <Typography variant="subtitle1" className="text-grey">
-                        No registered attendees
-                      </Typography>
-                    )}
-                  </div>
-                </Drawer>
               </div>
             ))}
           </div>
